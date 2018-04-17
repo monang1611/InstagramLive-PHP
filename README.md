@@ -33,3 +33,12 @@ This is mostly due to an invalid stream key: The stream key changes **every** ti
 This is due to you not running the "stop" command inside the script. You cannot just close the command window to make Instagram stop streaming, you must run the stop command in the script. If you *do* close the command window however, start it again and just run the stop command, this should stop Instagram from listing to live content.
 #### I get an error inside of Instagram when archiving my story
 This is usually due to archiving a stream that had no content (video). Just delete the archive and be go on with your day.
+
+# Donate
+If you would like to donate to me because you find what I do useful and would like to support me, you can do so through this methods:
+
+Patreon: https://www.patreon.com/JRoy
+
+PayPal.me: https://www.paypal.me/JoshuaRoy1
+
+Bitcoin: `32J2AqJBDY1VLq6wfZcLrTYS8fCcHHVDKD`
