@@ -1,28 +1,31 @@
 <?php
+logM("Loading InstagramLive-PHP v0.1...");
 set_time_limit(0);
 date_default_timezone_set('America/New_York');
+
+//Load Depends from Composer...
 require __DIR__.'/vendor/autoload.php';
+use InstagramAPI\Instagram;
+use InstagramAPI\Request\Live;
+
 require_once 'config.php';
-
-
-/////// (Sorta) Config (Still Don't Touch It)  ///////
-$username = IG_USERNAME;
-$password = IG_PASS;
+/////// (Sorta) Config (Still Don't Touch It) ///////
 $debug = false;
 $truncatedDebug = false;
-//////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
 
 
 //Login to Instagram
 logM("Logging into Instagram...");
-$ig = new \InstagramAPI\Instagram($debug, $truncatedDebug);
+$ig = new Instagram($debug, $truncatedDebug);
 try {
-    $ig->login($username, $password);
+    $ig->login(IG_USERNAME, IG_PASS);
 } catch (\Exception $e) {
-    echo 'Something went wrong: '.$e->getMessage()."\n";
+    echo 'Error While Logging in to Instagram: '.$e->getMessage()."\n";
     exit(0);
 }
-//Main Stream Block
+
+//Block Responsible for Creating the Livestream.
 try {
     logM("Logged In! Creating Livestream...");
     $stream = $ig->live->create();
@@ -48,23 +51,18 @@ try {
     logM("^^ Please Start Streaming in OBS/Streaming Program with the URL and Key Above ^^");
 
     logM("Live Stream is Ready for Commands:");
-    logM("Commands:\nhelp - Prints this message\nurl - Prints Stream URL\nkey - Prints Stream Key\ninfo - Grabs Stream Info\nviewers - Grabs Stream Viewers\necomments - Enables Comments\ndcomments - Disables Comments\nstop - Stops the Live Stream");
     newCommand($ig->live, $broadcastId, $streamUrl, $streamKey);
+    logM("Something Went Super Wrong! Attempting to At-Least Clean Up!");
     $ig->live->getFinalViewerList($broadcastId);
     $ig->live->end($broadcastId);
 } catch (\Exception $e) {
-    echo 'Something went wrong: '.$e->getMessage()."\n";
-}
-
-function chatLoop(InstagramAPI\Request\Live $live, $broadcastId) {
-    echo "hi";
-    return function (){};
+    echo 'Error While Creating Livestream: '.$e->getMessage()."\n";
 }
 
 /**
- * The handler for imteripting the commands passed via the command line.
+ * The handler for interpreting the commands passed via the command line.
  */
-function newCommand(InstagramAPI\Request\Live $live, $broadcastId, $streamUrl, $streamKey) {
+function newCommand(Live $live, $broadcastId, $streamUrl, $streamKey) {
     print "\n> ";
     $handle = fopen ("php://stdin","r");
     $line = trim(fgets($handle));
@@ -79,11 +77,12 @@ function newCommand(InstagramAPI\Request\Live $live, $broadcastId, $streamUrl, $
         //Needs this to retain, I guess?
         $live->getFinalViewerList($broadcastId);
         $live->end($broadcastId);
-        logM("Stream Ended! Would you like to keep it archived? Type yes to keep it archived.");
+        logM("Stream Ended!\nWould you like to keep the stream archived for 24 hours? Type \"yes\" to do so or anything else to not.");
         print "> ";
         $handle = fopen ("php://stdin","r");
         $archived = trim(fgets($handle));
         if ($archived == 'yes') {
+            logM("Adding to Archive!");
             $live->addToPostLive($broadcastId);
             logM("Livestream added to archive!");
         }
@@ -94,9 +93,11 @@ function newCommand(InstagramAPI\Request\Live $live, $broadcastId, $streamUrl, $
     } elseif ($line == 'key') {
         logM("======================== Current Stream Key ========================\n".$streamKey."\n======================== Current Stream Key ========================");
     } elseif ($line == 'info') {
-        $status = $live->getInfo($broadcastId)->getStatus();
-        $count = $live->getInfo($broadcastId)->getViewerCount();
-        logM("Info:\nStatus: $status\nViewer Count: $count");
+        $info = $live->getInfo($broadcastId);
+        $status = $info->getStatus();
+        $muted = var_export($info->is_Messages(), true);
+        $count = $info->getViewerCount();
+        logM("Info:\nStatus: $status\nMuted: $muted\nViewer Count: $count");
     } elseif ($line == 'viewers') {
         logM("Viewers:");
         $live->getInfo($broadcastId);
@@ -105,15 +106,16 @@ function newCommand(InstagramAPI\Request\Live $live, $broadcastId, $streamUrl, $
         }
     } elseif ($line == 'help') {
         logM("Commands:\nhelp - Prints this message\nurl - Prints Stream URL\nkey - Prints Stream Key\ninfo - Grabs Stream Info\nviewers - Grabs Stream Viewers\necomments - Enables Comments\ndcomments - Disables Comments\nstop - Stops the Live Stream");
-    }
-
-    else {
-       logM("Invalid Command!");
+    } else {
+       logM("Invalid Command. Type \"help\" for help!");
     }
     fclose($handle);
     newCommand($live, $broadcastId, $streamUrl, $streamKey);
 }
 
+/**
+ * Logs a message in console but it actually uses new lines.
+ */
 function logM($message) {
     print $message."\n";
 }
