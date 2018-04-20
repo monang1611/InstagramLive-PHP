@@ -1,5 +1,5 @@
 # InstagramLive-PHP
-A PHP script written in PHP that allows for you to go live on instagram with any streaming program that support RTMP!
+A PHP script that allows for you to go live on Instagram with any streaming program that supports RTMP!
 
 # Note
 This has been only tested on Windows, I have no clue if this works on UNIX-Based Systems. Feel free to try though!
