@@ -25,6 +25,7 @@ If you are running this after the first setup, work from step six on...
 5. Make Sure "Use Authentication" is **unchecked** and press "OK"
 6. Start Streaming in OBS
 7. To stop streaming, run the "stop" command in your terminal and then press "Stop Streaming" in OBS
+* Note: To emulate the exact content being sent to Instagram, set your OBS canvas size to 720x1280. This can be done by going to Settings->Video and editing Base Canvas Resolution to "720x1280".
 
 # FAQ
 #### OBS gives a "Failed to connect" error
