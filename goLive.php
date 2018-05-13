@@ -14,6 +14,10 @@ $debug = false;
 $truncatedDebug = false;
 /////////////////////////////////////////////////////
 
+if (IG_USERNAME == "USERNAME" || IG_PASS == "PASSWORD") {
+    logM("Default Username and Passwords have not been changed! Exiting...");
+    exit();
+}
 
 //Login to Instagram
 logM("Logging into Instagram...");
