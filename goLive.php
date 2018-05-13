@@ -1,5 +1,5 @@
 <?php
-logM("Loading InstagramLive-PHP v0.1...");
+logM("Loading InstagramLive-PHP v0.2...");
 set_time_limit(0);
 date_default_timezone_set('America/New_York');
 
@@ -27,6 +27,10 @@ try {
 
 //Block Responsible for Creating the Livestream.
 try {
+    if (!$ig->isMaybeLoggedIn) {
+        logM("Couldn't Login! Exiting!");
+        exit();
+    }
     logM("Logged In! Creating Livestream...");
     $stream = $ig->live->create();
     $broadcastId = $stream->getBroadcastId();
