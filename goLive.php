@@ -84,7 +84,7 @@ function newCommand(Live $live, $broadcastId, $streamUrl, $streamKey) {
     } elseif ($line == 'dcomments') {
         $live->disableComments($broadcastId);
         logM("Disabled Comments!");
-    } elseif ($line == 'stop') {
+    } elseif ($line == 'stop' || $line == 'end') {
         fclose($handle);
         //Needs this to retain, I guess?
         $live->getFinalViewerList($broadcastId);
