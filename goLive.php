@@ -1,4 +1,8 @@
 <?php
+if (php_sapi_name() !== "cli") {
+    die("You may only run this inside of the PHP Command Line! If you did run this in the command line, please report: \"".php_sapi_name()."\" to the InstagramLive-PHP Repo!");
+}
+
 logM("Loading InstagramLive-PHP v0.2...");
 set_time_limit(0);
 date_default_timezone_set('America/New_York');
