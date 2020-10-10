@@ -1,6 +1,5 @@
 vendor/
 composer.lock
-config.php
 /nbproject/private/
 /nbproject
 /extensions/CommentFetcher/log.log
