@@ -11,6 +11,11 @@ date_default_timezone_set('America/New_York');
 require __DIR__.'/vendor/autoload.php';
 use InstagramAPI\Instagram;
 use InstagramAPI\Request\Live;
+use InstagramAPI\Response\BroadcastCommentsResponse;
+
+require_once './extensions/Extension.php';
+require './extensions/ExtensionsList.php';
+require './extensions/CommentFetcher/CommentFetcher.php';
 
 require_once 'config.php';
 /////// (Sorta) Config (Still Don't Touch It) ///////
@@ -26,6 +31,13 @@ if (IG_USERNAME == "USERNAME" || IG_PASS == "PASSWORD") {
 //Login to Instagram
 logM("Logging into Instagram...");
 $ig = new Instagram($debug, $truncatedDebug);
+
+$extensions = new ExtensionsList();
+
+$commentFetcherExtensionName = "CommentFetcher";
+
+$broadcastId = null;
+
 try {
     $ig->login(IG_USERNAME, IG_PASS);
 } catch (\Exception $e) {
@@ -49,13 +61,13 @@ try {
         'rtmp://\1:80/',
         $stream->getUploadUrl()
     );
-
+    print($stream->getUploadUrl());
     //Grab the stream url as well as the stream key.
     $split = preg_split("[".$broadcastId."]", $streamUploadUrl);
 
     $streamUrl = $split[0];
     $streamKey = $broadcastId.$split[1];
-
+    
     logM("================================ Stream URL ================================\n".$streamUrl."\n================================ Stream URL ================================");
 
     logM("======================== Current Stream Key ========================\n".$streamKey."\n======================== Current Stream Key ========================");
@@ -63,6 +75,10 @@ try {
     logM("^^ Please Start Streaming in OBS/Streaming Program with the URL and Key Above ^^");
 
     logM("Live Stream is Ready for Commands:");
+    
+    loadExtensions();
+    runExtensions();
+    
     newCommand($ig->live, $broadcastId, $streamUrl, $streamKey);
     logM("Something Went Super Wrong! Attempting to At-Least Clean Up!");
     $ig->live->getFinalViewerList($broadcastId);
@@ -78,14 +94,26 @@ function newCommand(Live $live, $broadcastId, $streamUrl, $streamKey) {
     print "\n> ";
     $handle = fopen ("php://stdin","r");
     $line = trim(fgets($handle));
+    handleCommand($line, $handle);
+    fclose($handle);
+    newCommand($live, $broadcastId, $streamUrl, $streamKey);
+}
+
+
+function handleCommand($line, $handle = null){
+    global $ig, $broadcastId, $extensions, $commentFetcherExtensionName;
+    $live = $ig->live;
     if($line == 'ecomments') {
         $live->enableComments($broadcastId);
         logM("Enabled Comments!");
     } elseif ($line == 'dcomments') {
         $live->disableComments($broadcastId);
         logM("Disabled Comments!");
+    } elseif ($line == 'getcomments'){
+        $extensions[$commentFetcherExtensionName]->printComments();
     } elseif ($line == 'stop' || $line == 'end') {
         fclose($handle);
+        stopExtensions();
         //Needs this to retain, I guess?
         $live->getFinalViewerList($broadcastId);
         $live->end($broadcastId);
@@ -119,15 +147,38 @@ function newCommand(Live $live, $broadcastId, $streamUrl, $streamKey) {
     } elseif ($line == 'help') {
         logM("Commands:\nhelp - Prints this message\nurl - Prints Stream URL\nkey - Prints Stream Key\ninfo - Grabs Stream Info\nviewers - Grabs Stream Viewers\necomments - Enables Comments\ndcomments - Disables Comments\nstop - Stops the Live Stream");
     } else {
-       logM("Invalid Command. Type \"help\" for help!");
+        logM("Invalid Command. Type \"help\" for help!");
     }
-    fclose($handle);
-    newCommand($live, $broadcastId, $streamUrl, $streamKey);
 }
+
+
+
 
 /**
  * Logs a message in console but it actually uses new lines.
  */
 function logM($message) {
     print $message."\n";
+}
+
+
+
+function runExtensions(){
+    global $extensions;
+    foreach($extensions as $extension){
+        $extension->run();
+    }
+}
+
+function stopExtensions(){
+    global $extensions;
+    foreach($extensions as $extension){
+        $extension->stop();
+    }
+}
+
+function loadExtensions(){
+    global $extensions, $broadcastId, $commentFetcherExtensionName, $ig;
+    $extensions[$commentFetcherExtensionName] = new CommentFetcher($broadcastId, $ig);
+    
 }
