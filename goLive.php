@@ -21,7 +21,7 @@ if (IG_USERNAME == "USERNAME" || IG_PASS == "PASSWORD") {
 logM("Logging into Instagram...");
 $ig = new \InstagramFollowers\Instagram();
 try {
-    $ig->login(IG_USERNAME, IG_PASS);
+    $ig->login(IG_USERNAME, IG_PASS, true);
 } catch (\Exception $e) {
     echo 'Error While Logging in to Instagram: ' . $e->getMessage() . "\n";
     exit(0);
