@@ -1,5 +1,5 @@
 # InstagramLive-PHP
-A PHP script that allows for you to go live on Instagram with any streaming program that supports RTMP!
+A PHP script that allows you to go live on Instagram with any streaming app that supports RTMP!
 
 # Note
 This has been only tested on Windows, I have no clue if this works on UNIX-Based Systems. Feel free to try though!
@@ -15,7 +15,7 @@ If you are running this after the first setup, work from step six on...
 4. Run ```composer require mgp25/instagram-php react/child-process``` in the cloned folder
 5. Edit the Username and Password inside of `config.php` to your instagram details
 6. Run the `goLive.php` script. (`php -f goLive.php`)
-7. Copy you Stream-URL and Stream-Key and paste them into your streaming software. [See OBS-Setup](https://github.com/JRoy/InstagramLive-PHP#obs-setup)
+7. Copy your Stream-URL and Stream-Key and paste them into your streaming software. [See OBS-Setup](https://github.com/JRoy/InstagramLive-PHP#obs-setup)
 
 # OBS-Setup
 1. Go to the "Stream" section of your OBS Settings 
